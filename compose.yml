@@ -1,0 +1,13 @@
+services:
+  trash-searcher:
+    build:
+      context: .
+      dockerfile: distribution/Dockerfile
+    container_name: trash-searcher
+    working_dir: /src
+    volumes:
+      - ./src/product:/src/product
+      - ./src/tests:/src/tests
+    restart: always
+    env_file: .env
+    tty: true

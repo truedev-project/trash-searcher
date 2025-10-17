@@ -1,0 +1,50 @@
+services:
+
+  fiftyone:
+    image: voxel51/fiftyone:latest
+    container_name: fiftyone
+    restart: on-failure
+    depends_on:
+      - mongodb
+    working_dir: /fiftyone
+    env_file:
+      - .env
+    ports:
+      - "8091:8091"
+      - "8092:8092"
+    volumes:
+      - ./tmp/jupyter:/jupyter
+      - datasets:/root/fiftyone
+      - ./tmp/workspace:/workspace/
+    command: bash -c "fiftyone app launch --port 8091 & fiftyone app launch --port 8092"
+
+  mongodb:
+    image: mongo:7.0.11
+    container_name: mongo_db_fiftyone
+    restart: on-failure
+    volumes:
+      - mongo_db:/data/db
+
+  jupyter:
+    build:
+      context: .
+      dockerfile: distribution/Dockerfile
+    container_name: jupyter
+    restart: on-failure
+    depends_on:
+      - mongodb
+    working_dir: /jupyter
+    ports:
+      - "8089:8089"
+      - "8094:8094"
+    env_file:
+      - .env
+    volumes:
+      - ./tmp/jupyter:/jupyter
+      - datasets:/root/fiftyone
+      - ./tmp/workspace:/workspace/
+    command: jupyter notebook --allow-root --ip 0.0.0.0 --port 8089
+
+volumes:
+  mongo_db:
+  datasets:
